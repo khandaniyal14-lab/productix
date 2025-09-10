@@ -25,3 +25,4 @@ SQLAlchemy
 psycopg2-binary 
 python-jose       
 pydantic
+email-validator
