@@ -38,7 +38,7 @@ const Signup = () => {
     } catch (err) {
       console.error('Signup error:', err);
       if (err.code === 'ERR_NETWORK') {
-        setError('Unable to connect to the server. Please ensure the backend is running on http://127.0.0.1:8000');
+        setError('Unable to connect to the sign_up server');
       } else {
         setError(err.response?.data?.message || 'Signup failed. Please try again.');
       }
