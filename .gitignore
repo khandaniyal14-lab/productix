@@ -1,0 +1,22 @@
+# Python virtual environment
+venv_fastapi/
+env/
+*.pyc
+__pycache__/
+
+# VS Code / IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+venv_fastapi/
+productix_fastapi/venv_fastapi/
+project/node_modules/
+*.pyc
+__pycache__/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
