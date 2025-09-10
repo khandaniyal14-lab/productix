@@ -67,7 +67,7 @@ const Landing = () => {
               Watch Our Productivity Demo
             </h2>
             <video
-              src="/video/intro_video.mp4"  // served directly from public/
+              src="/intro_video.mp4"  // served directly from public/
               controls
               className="w-full rounded-lg shadow-lg"
               style={{ maxHeight: "400px" }}
