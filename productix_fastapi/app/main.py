@@ -27,7 +27,7 @@ app = FastAPI(
     version="1.0.0"
 )
 origins = [
-    "http://localhost:5173",
+    "https://productix-ai-productivity-copilot.onrender.com",
     "http://127.0.0.1:5173",
     # add production URL here later, e.g. "https://yourdomain.com"
 ]
