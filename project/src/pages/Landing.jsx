@@ -73,13 +73,9 @@ const Landing = () => {
              <li>3) Productivity Gaps and Anomalies</li>
              <li>4) Productivity Analytics</li>
              <li>5) Agentic AI to Drive Productivity</li>
-            </ul>
-          </div>
-              Your browser does not support the video tag.
-            </video>
-          </div>
-        </div>
-      </div>
+           </ul>
+         </div>
+
 
       {/* Features Section */}
       <div className="py-20 bg-black/20">
