@@ -62,17 +62,19 @@ const Landing = () => {
             </div>
           </div>
 
-          {/* Video Section */}
-          <div className="max-w-2xl mx-auto">
-            <h2 className="text-2xl font-semibold text-white text-center mb-6">
-              Get YOUR Productivity Audit by AI for FREE
-            </h2>
-            <video
-              src={intro_video} 
-              controls
-              className="w-full rounded-lg shadow-lg"
-              style={{ maxHeight: "400px" }}
-            >
+         {/* Productix AI Features Section */}
+         <div className="max-w-2xl mx-auto text-center">
+           <h2 className="text-2xl font-semibold text-white mb-6">
+             What Productix AI Offers
+           </h2>
+           <ul className="space-y-4 text-lg text-white/90">
+             <li>1) Productivity Chat Bot</li>
+             <li>2) Productivity Prediction</li>
+             <li>3) Productivity Gaps and Anomalies</li>
+             <li>4) Productivity Analytics</li>
+             <li>5) Agentic AI to Drive Productivity</li>
+            </ul>
+          </div>
               Your browser does not support the video tag.
             </video>
           </div>
