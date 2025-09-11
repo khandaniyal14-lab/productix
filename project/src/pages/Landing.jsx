@@ -48,9 +48,8 @@ const Landing = () => {
             </h1>
 
             <p className="text-xl text-white/80 mb-8 max-w-3xl mx-auto">
-              Are YOU Stuck in Low Efficiency, Order Delays and Need to Find Productivity Boosters? Productix AI is YOUR Productivity Co Pilot
+              Are YOU Stuck in Low Efficiency, Order Delays and Need to Find Productivity Boosters? Productix AI is YOUR Productivity Co Pilot.
               Basic Version Free, Standard Version  FREE 01 Month Trial, Customization Very Economical
-              Get YOUR Productivity Audit by AI for FREE
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
@@ -66,7 +65,7 @@ const Landing = () => {
           {/* Video Section */}
           <div className="max-w-2xl mx-auto">
             <h2 className="text-2xl font-semibold text-white text-center mb-6">
-              Watch Our Productivity Demo
+              Get YOUR Productivity Audit by AI for FREE
             </h2>
             <video
               src={intro_video.mp4} 
