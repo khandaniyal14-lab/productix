@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Calculator, BarChart3, MessageCircle, FileText, ArrowRight, Zap, Target, Brain } from 'lucide-react';
-import intro_video from '../../public/intro_video.mp4'
+import intro_video from '../assets/intro_video.mp4';
 
 const Landing = () => {
   const features = [
