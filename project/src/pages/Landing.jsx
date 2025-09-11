@@ -1,7 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calculator, BarChart3, MessageCircle, FileText, ArrowRight, Zap, Target, Brain } from 'lucide-react';
-import intro_video from '../assets/intro_video.mp4';
+import {
+  Calculator,
+  BarChart3,
+  MessageCircle,
+  FileText,
+  ArrowRight,
+  Zap,
+  Target,
+  Brain
+} from 'lucide-react';
 
 const Landing = () => {
   const features = [
@@ -48,8 +56,9 @@ const Landing = () => {
             </h1>
 
             <p className="text-xl text-white/80 mb-8 max-w-3xl mx-auto">
-              Are YOU Stuck in Low Efficiency, Order Delays and Need to Find Productivity Boosters? Productix AI is YOUR Productivity Co Pilot.
-              Basic Version Free, Standard Version  FREE 01 Month Trial, Customization Very Economical
+              Are YOU Stuck in Low Efficiency, Order Delays and Need to Find Productivity Boosters?
+              Productix AI is YOUR Productivity Co Pilot. Basic Version Free, Standard Version FREE
+              01 Month Trial, Customization Very Economical
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
@@ -62,100 +71,105 @@ const Landing = () => {
             </div>
           </div>
 
-         {/* Productix AI Features Section */}
-         <div className="max-w-2xl mx-auto text-center">
-           <h2 className="text-2xl font-semibold text-white mb-6">
-             What Productix AI Offers
-           </h2>
-           <ul className="space-y-4 text-lg text-white/90">
-             <li>1) Productivity Chat Bot</li>
-             <li>2) Productivity Prediction</li>
-             <li>3) Productivity Gaps and Anomalies</li>
-             <li>4) Productivity Analytics</li>
-             <li>5) Agentic AI to Drive Productivity</li>
-           </ul>
-         </div>
-
-
-      {/* Features Section */}
-      <div className="py-20 bg-black/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">
-              Powerful Features
+          {/* Productix AI Features Section */}
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-2xl font-semibold text-white mb-6">
+              What Productix AI Offers
             </h2>
-            <p className="text-xl text-white/70">
-              Everything you need to optimize your productivity
-            </p>
+            <ol className="list-decimal list-inside space-y-4 text-lg text-white/90">
+              <li>Productivity Chat Bot</li>
+              <li>Productivity Prediction</li>
+              <li>Productivity Gaps and Anomalies</li>
+              <li>Productivity Analytics</li>
+              <li>Agentic AI to Drive Productivity</li>
+            </ol>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
-              <div key={index} className="card p-6 hover:scale-105 transition-transform duration-200">
-                <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${feature.color} flex items-center justify-center mb-4`}>
-                  <feature.icon className="text-white" size={24} />
-                </div>
-                <h3 className="text-xl font-semibold text-white mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-white/70">
-                  {feature.description}
+          {/* Features Section */}
+          <div className="py-20 bg-black/20">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-16">
+                <h2 className="text-4xl font-bold text-white mb-4">Powerful Features</h2>
+                <p className="text-xl text-white/70">
+                  Everything you need to optimize your productivity
                 </p>
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
 
-      {/* Benefits Section */}
-      <div className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Zap className="text-white" size={32} />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {features.map((feature, index) => (
+                  <div
+                    key={index}
+                    className="card p-6 hover:scale-105 transition-transform duration-200"
+                  >
+                    <div
+                      className={`w-12 h-12 rounded-lg bg-gradient-to-r ${feature.color} flex items-center justify-center mb-4`}
+                    >
+                      <feature.icon className="text-white" size={24} />
+                    </div>
+                    <h3 className="text-xl font-semibold text-white mb-2">
+                      {feature.title}
+                    </h3>
+                    <p className="text-white/70">{feature.description}</p>
+                  </div>
+                ))}
               </div>
-              <h3 className="text-2xl font-bold text-white mb-4">Lightning Fast</h3>
-              <p className="text-white/70">
-                Get instant productivity calculations and AI insights in real-time.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Brain className="text-white" size={32} />
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-4">AI-Powered</h3>
-              <p className="text-white/70">
-                Advanced machine learning algorithms provide intelligent recommendations.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Target className="text-white" size={32} />
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-4">Goal-Oriented</h3>
-              <p className="text-white/70">
-                Set targets and track progress with personalized action plans.
-              </p>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* CTA Section */}
-      <div className="py-20 bg-gradient-to-r from-primary-600 to-secondary-600">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl font-bold text-white mb-4">
-            Ready to Boost Your Productivity?
-          </h2>
-          <p className="text-xl text-white/90 mb-8">
-            Join thousands of users who have transformed their workflow with Productix AI.
-          </p>
-          <Link to="/signup" className="bg-white text-primary-600 font-semibold py-4 px-8 rounded-lg hover:bg-gray-100 transition-colors text-lg">
-            Start Your Journey Today
-          </Link>
+          {/* Benefits Section */}
+          <div className="py-20">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Zap className="text-white" size={32} />
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-4">Lightning Fast</h3>
+                  <p className="text-white/70">
+                    Get instant productivity calculations and AI insights in real-time.
+                  </p>
+                </div>
+
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Brain className="text-white" size={32} />
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-4">AI-Powered</h3>
+                  <p className="text-white/70">
+                    Advanced machine learning algorithms provide intelligent recommendations.
+                  </p>
+                </div>
+
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Target className="text-white" size={32} />
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-4">Goal-Oriented</h3>
+                  <p className="text-white/70">
+                    Set targets and track progress with personalized action plans.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA Section */}
+          <div className="py-20 bg-gradient-to-r from-primary-600 to-secondary-600">
+            <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+              <h2 className="text-4xl font-bold text-white mb-4">
+                Ready to Boost Your Productivity?
+              </h2>
+              <p className="text-xl text-white/90 mb-8">
+                Join thousands of users who have transformed their workflow with Productix AI.
+              </p>
+              <Link
+                to="/signup"
+                className="bg-white text-primary-600 font-semibold py-4 px-8 rounded-lg hover:bg-gray-100 transition-colors text-lg"
+              >
+                Start Your Journey Today
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </div>
