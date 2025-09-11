@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Calculator, BarChart3, MessageCircle, FileText, ArrowRight, Zap, Target, Brain } from 'lucide-react';
+import intro_video from '../../public/intro_video.mp4'
 
 const Landing = () => {
   const features = [
@@ -47,8 +48,9 @@ const Landing = () => {
             </h1>
 
             <p className="text-xl text-white/80 mb-8 max-w-3xl mx-auto">
-              Revolutionize your productivity with AI-powered calculations, intelligent analysis,
-              and personalized insights. Upload videos, track metrics, and get actionable recommendations.
+              Are YOU Stuck in Low Efficiency, Order Delays and Need to Find Productivity Boosters? Productix AI is YOUR Productivity Co Pilot
+              Basic Version Free, Standard Version  FREE 01 Month Trial, Customization Very Economical
+              Get YOUR Productivity Audit by AI for FREE
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
@@ -67,7 +69,7 @@ const Landing = () => {
               Watch Our Productivity Demo
             </h2>
             <video
-              src="/intro_video.mp4"  
+              src={intro_video.mp4} 
               controls
               className="w-full rounded-lg shadow-lg"
               style={{ maxHeight: "400px" }}
