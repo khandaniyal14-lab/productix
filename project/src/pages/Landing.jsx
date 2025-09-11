@@ -68,7 +68,7 @@ const Landing = () => {
               Get YOUR Productivity Audit by AI for FREE
             </h2>
             <video
-              src={intro_video.mp4} 
+              src={intro_video} 
               controls
               className="w-full rounded-lg shadow-lg"
               style={{ maxHeight: "400px" }}
