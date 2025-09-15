@@ -21,28 +21,56 @@ const Login = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+  e.preventDefault();
+  setLoading(true);
+  setError('');
 
-    try {
-      const res = await authService.login(formData);
-      console.log("Login response:", res);
-      if (res.access_token) {
-        localStorage.setItem('token', res.access_token);
+  try {
+    const res = await authService.login(formData);
+    console.log("Login response:", res);
+    
+    if (res.access_token) {
+      localStorage.setItem('token', res.access_token);
+
+      if (res.expires_in) {
+        const expirationTime = Date.now() + (res.expires_in * 1000);
+        localStorage.setItem('token_expiration', expirationTime.toString());
       }
-      navigate('/dashboard');
-    } catch (err) {
-      console.error('Login error:', err);
-      if (err.code === 'ERR_NETWORK') {
-        setError('Unable to connect to the server. Please ensure the backend is running on http://127.0.0.1:8000');
-      } else {
-        setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
-      }
-    } finally {
-      setLoading(false);
     }
-  };
+
+    const from = location.state?.from?.pathname || '/dashboard';
+    navigate(from, { replace: true });
+
+  } catch (err) {
+    console.error('Login error:', err);
+
+    if (err.code === 'ERR_NETWORK') {
+      setError('Unable to connect to the server. Please check your internet connection and ensure the backend is running.');
+    } else if (err.response) {
+      // Use backend error if available
+      const backendMessage = err.response.data?.detail || err.response.data?.message;
+
+      if (backendMessage) {
+        setError(backendMessage);
+      } else if (err.response.status === 401) {
+        setError('Unauthorized. Please check your email and password.');
+      } else if (err.response.status === 429) {
+        setError('Too many login attempts. Please try again later.');
+      } else if (err.response.status >= 500) {
+        setError('Server error. Please try again later.');
+      } else {
+        setError('Login failed. Please try again.');
+      }
+    } else {
+      setError('Unexpected error occurred. Please try again.');
+    }
+
+    logError(err);
+
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
