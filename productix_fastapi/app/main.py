@@ -5,7 +5,9 @@ from pydantic import BaseModel, Field
 from typing import Dict, Any, List
 from fastapi import Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import HTTPException, Depends, status
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from .database import Base, engine, get_db
 from .models import User, Tenant, AIData, ProductivityCalculation, AIAnalysis,ChatbotHistory, AIReport
 from .schemas import SignUpSchema, LoginSchema, TokenSchema
