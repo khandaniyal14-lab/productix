@@ -195,39 +195,111 @@ async def root():
     return {"message": "Hello World"}
 
 
-@app.post("/signup", response_model=TokenSchema)
-def signup(user: SignUpSchema, db: Session = Depends(get_db)):
-    existing_user = db.query(User).filter(User.email == user.email).first()
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+@app.post("/signup", response_model=TokenSchema, status_code=status.HTTP_201_CREATED)
+async def signup(user: SignUpSchema, db: Session = Depends(get_db)):
+    """
+    Register a new user and create a tenant
+    """
+    try:
+        # Check if user already exists
+        existing_user = db.query(User).filter(User.email == user.email).first()
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already registered"
+            )
 
-    tenant = Tenant(name=user.name)
-    db.add(tenant)
-    db.commit()
-    db.refresh(tenant)
+        # Validate password strength
+        if len(user.password) < 8:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Password must be at least 8 characters long"
+            )
 
-    hashed_password = hash_password(user.password)
-    new_user = User(
-        name=user.name,
-        email=user.email,
-        password_hash=hashed_password,
-        tenant_id=tenant.id
-    )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+        # Create tenant + user within a transaction
+        with db.begin_nested():
+            tenant = Tenant(name=user.name)
+            db.add(tenant)
+            db.flush()
 
-    access_token = create_access_token({"user_id": new_user.id, "tenant_id": tenant.id})
-    return {"access_token": access_token, "token_type": "bearer"}
+            hashed_password = hash_password(user.password)
+            new_user = User(
+                name=user.name,
+                email=user.email,
+                password_hash=hashed_password,
+                tenant_id=tenant.id
+            )
+            db.add(new_user)
+
+        db.commit()
+
+        db.refresh(tenant)
+        db.refresh(new_user)
+
+        access_token = create_access_token(
+            {"user_id": new_user.id, "tenant_id": tenant.id}
+        )
+
+        logger.info(f"New user registered: {user.email} with tenant ID: {tenant.id}")
+
+        return {"access_token": access_token, "token_type": "bearer"}
+
+    except IntegrityError:
+        db.rollback()
+        logger.error(f"Integrity error during signup for email: {user.email}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Registration failed due to database constraints"
+        )
+    # ⚠️ Important: don't catch bare Exception here
+    # Let FastAPI bubble up HTTPException normally
+
+
+
 
 @app.post("/login", response_model=TokenSchema)
-def login(credentials: LoginSchema, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == credentials.email).first()
-    if not user or not verify_password(credentials.password, user.password_hash):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+async def login(credentials: LoginSchema, db: Session = Depends(get_db)):
+    """
+    Authenticate user and return JWT token
+    """
+    try:
+        user = db.query(User).filter(User.email == credentials.email).first()
+        
+        # Use constant-time comparison to prevent timing attacks
+        if not user or not verify_password(credentials.password, user.password_hash):
+            logger.warning(f"Failed login attempt for email: {credentials.email}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
 
-    access_token = create_access_token({"user_id": user.id, "tenant_id": user.tenant_id})
-    return {"access_token": access_token, "token_type": "bearer"}
+        # Optional: check if user account is active
+        if hasattr(user, 'is_active') and not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Account deactivated",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        # Create access token
+        access_token = create_access_token(
+            {"user_id": user.id, "tenant_id": user.tenant_id}
+        )
+
+        logger.info(f"Successful login for user: {user.email}")
+        
+        return {"access_token": access_token, "token_type": "bearer"}
+
+    except HTTPException:
+        # re-raise expected HTTP errors (don’t overwrite them)
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error during login: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error during authentication"
+        )
 
 @app.get("/productivity-records", summary="Fetch productivity records for logged-in tenant")
 def get_productivity_records(
