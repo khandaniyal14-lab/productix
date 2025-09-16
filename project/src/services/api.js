@@ -35,8 +35,14 @@ api.interceptors.response.use(
 
 // Auth services
 export const authService = {
-  signup: async (userData) => {
-    const response = await api.post('/signup', userData);
+  signup: async (formData) => {
+    const payload = {
+      name: formData.name,       // FastAPI expects "name"
+      email: formData.email,     // FastAPI expects "email"
+      password: formData.password // FastAPI expects "password"
+    };
+
+    const response = await api.post('/signup', payload);
     return response.data;
   },
 
