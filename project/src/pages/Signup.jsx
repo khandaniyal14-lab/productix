@@ -3,14 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/api';
 
 const Signup = () => {
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: ''
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
     setError('');
     setSuccess('');
   };
@@ -21,6 +28,7 @@ const Signup = () => {
     setError('');
     setSuccess('');
 
+    // Client-side validation
     if (!formData.name || !formData.email || !formData.password) {
       setError('Please fill in all required fields');
       setLoading(false);
@@ -33,37 +41,67 @@ const Signup = () => {
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address');
+      setLoading(false);
+      return;
+    }
+
     try {
-      await authService.signup(formData);
+      const response = await authService.signup(formData);
 
       setSuccess('Account created successfully! Redirecting to login...');
-      const emailToPrefill = formData.email;
 
+      // Save email before clearing form
+      const emailToPrefill = formData.email;
+      localStorage.setItem('last_registered_email', emailToPrefill);
+
+      // Clear form
+      setFormData({
+        name: '',
+        email: '',
+        password: ''
+      });
+
+      // Redirect with slight delay
       setTimeout(() => {
-        navigate('/login', { state: { prefillEmail: emailToPrefill } });
-      }, 1500);
+        navigate('/login', { 
+          state: { 
+            prefillEmail: emailToPrefill,
+            message: 'Account created successfully! Please login.' 
+          }
+        });
+      }, 2000);
 
     } catch (err) {
       console.error('Signup error:', err);
 
       if (err.code === 'ERR_NETWORK') {
-        setError('Unable to connect to the server.');
+        setError('Unable to connect to the server. Please check your internet connection and ensure the backend is running.');
+      } else if (err.response?.status === 400) {
+        const detail = err.response?.data?.detail;
+        if (detail === 'Email already registered') {
+          setError('This email address is already registered. Please use a different email or try logging in.');
+        } else if (detail === 'Password must be at least 8 characters long') {
+          setError('Password must be at least 8 characters long');
+        } else if (detail === 'Registration failed due to database constraints') {
+          setError('Something went wrong while creating your account. Please try again.');
+        } else {
+          setError(detail || 'Invalid registration data. Please check your information.');
+        }
+      } else if (err.response?.status === 422) {
+        setError('Validation error. Please check your input fields.');
+      } else if (err.response?.status >= 500) {
+        setError('Server error. Please try again later.');
       } else {
-        setError(err.response?.data?.detail || 'Signup failed. Please try again.');
+        setError(err.response?.data?.message || err.response?.data?.detail || 'Signup failed. Please try again.');
       }
+
     } finally {
       setLoading(false);
     }
   };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      {/* Your form fields + error/success display here */}
-    </form>
-  );
-};
-
-export default Signup;
 
 
   return (
