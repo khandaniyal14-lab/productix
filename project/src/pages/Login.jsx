@@ -1,27 +1,42 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { LogIn, Mail, Lock, AlertCircle } from 'lucide-react';
 import { authService } from '../services/api';
 
+// ----------------- Component -----------------
 const Login = () => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  // ---------- State ----------
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const navigate = useNavigate();
-  const location = useLocation();
 
+  const navigate = useNavigate();
+
+  // ---------- Handlers ----------
+  // Update form state
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
     setError('');
   };
 
+  // Handle login submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
+      // ---- API Call ----
       const res = await authService.login(formData);
+      console.log("Login response:", res);
 
+      // ---- Token Handling ----
       if (res.access_token) {
         localStorage.setItem('token', res.access_token);
 
@@ -29,20 +44,36 @@ const Login = () => {
           const expirationTime = Date.now() + (res.expires_in * 1000);
           localStorage.setItem('token_expiration', expirationTime.toString());
         }
-
-        const from = location.state?.from?.pathname || '/dashboard';
-        navigate(from, { replace: true });
       }
+
+      // ---- Redirect ----
+      const from = location.state?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
+
     } catch (err) {
+      // ---- Error Handling ----
       console.error('Login error:', err);
 
       if (err.code === 'ERR_NETWORK') {
-        setError('Unable to connect to the server. Please check your internet connection.');
-      } else if (err.response?.status === 401) {
-        setError('Unauthorized. Please check your email and password.');
+        setError('Unable to connect to the server. Please check your internet connection and ensure the backend is running.');
+      } else if (err.response) {
+        const backendMessage = err.response.data?.detail || err.response.data?.message;
+        if (backendMessage) {
+          setError(backendMessage);
+        } else if (err.response.status === 401) {
+          setError('Unauthorized. Please check your email and password.');
+        } else if (err.response.status === 429) {
+          setError('Too many login attempts. Please try again later.');
+        } else if (err.response.status >= 500) {
+          setError('Server error. Please try again later.');
+        } else {
+          setError('Login failed. Please try again.');
+        }
       } else {
-        setError(err.response?.data?.detail || 'Login failed. Please try again.');
+        setError('Unexpected error occurred. Please try again.');
       }
+
+      logError(err); // <-- assuming you have a logger
     } finally {
       setLoading(false);
     }
