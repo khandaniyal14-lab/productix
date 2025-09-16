@@ -1,76 +1,52 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { LogIn, Mail, Lock, AlertCircle } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../services/api';
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
     setError('');
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  setError('');
+    e.preventDefault();
+    setLoading(true);
+    setError('');
 
-  try {
-    const res = await authService.login(formData);
-    console.log("Login response:", res);
-    
-    if (res.access_token) {
-      localStorage.setItem('token', res.access_token);
+    try {
+      const res = await authService.login(formData);
 
-      if (res.expires_in) {
-        const expirationTime = Date.now() + (res.expires_in * 1000);
-        localStorage.setItem('token_expiration', expirationTime.toString());
+      if (res.access_token) {
+        localStorage.setItem('token', res.access_token);
+
+        if (res.expires_in) {
+          const expirationTime = Date.now() + (res.expires_in * 1000);
+          localStorage.setItem('token_expiration', expirationTime.toString());
+        }
+
+        const from = location.state?.from?.pathname || '/dashboard';
+        navigate(from, { replace: true });
       }
-    }
+    } catch (err) {
+      console.error('Login error:', err);
 
-    const from = location.state?.from?.pathname || '/dashboard';
-    navigate(from, { replace: true });
-
-  } catch (err) {
-    console.error('Login error:', err);
-
-    if (err.code === 'ERR_NETWORK') {
-      setError('Unable to connect to the server. Please check your internet connection and ensure the backend is running.');
-    } else if (err.response) {
-      // Use backend error if available
-      const backendMessage = err.response.data?.detail || err.response.data?.message;
-
-      if (backendMessage) {
-        setError(backendMessage);
-      } else if (err.response.status === 401) {
+      if (err.code === 'ERR_NETWORK') {
+        setError('Unable to connect to the server. Please check your internet connection.');
+      } else if (err.response?.status === 401) {
         setError('Unauthorized. Please check your email and password.');
-      } else if (err.response.status === 429) {
-        setError('Too many login attempts. Please try again later.');
-      } else if (err.response.status >= 500) {
-        setError('Server error. Please try again later.');
       } else {
-        setError('Login failed. Please try again.');
+        setError(err.response?.data?.detail || 'Login failed. Please try again.');
       }
-    } else {
-      setError('Unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
-
-    logError(err);
-
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
