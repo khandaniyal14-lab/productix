@@ -14,6 +14,7 @@ from .schemas import SignUpSchema, LoginSchema, TokenSchema
 from .auth import hash_password, verify_password, create_access_token
 from .dependencies import  get_current_user
 from fastapi.security import HTTPBearer
+import logging
 security = HTTPBearer()
 Base.metadata.create_all(bind=engine)
 # Import the core logic functions from the file we just created
@@ -23,6 +24,12 @@ from .core_logic import (
     get_rag_chatbot_response,
     get_ai_agent_report
 )
+logging.basicConfig(
+    level=logging.INFO,  # DEBUG for more detail, WARNING for less
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+logger = logging.getLogger(__name__)
+
 app = FastAPI(
     title="Productix AI & Calculation Engine",
     description="A high-performance API for all productivity calculations and AI-driven analysis features of the Productix application.",
