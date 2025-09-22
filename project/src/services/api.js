@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://productix-4.onrender.com';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://productix-backend-v1rk.onrender.com';
 
 // Create axios instance
 const api = axios.create({
