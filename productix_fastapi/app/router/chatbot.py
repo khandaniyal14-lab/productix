@@ -253,8 +253,8 @@ def get_rag_chatbot_response(records: dict, query: str) -> dict:
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.database import get_db
-from app import models, schemas
+from ..database import get_db
+from .. import models, schemas
 from ..deps import get_current_user
 
 from typing import Dict, Any
