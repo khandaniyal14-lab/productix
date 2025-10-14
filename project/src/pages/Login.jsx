@@ -19,7 +19,6 @@ const Login = () => {
     });
     setError('');
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -28,20 +27,77 @@ const Login = () => {
     try {
       const res = await authService.login(formData);
       console.log("Login response:", res);
+      localStorage.setItem("access_token", res.access_token);
+
       if (res.access_token) {
         localStorage.setItem('token', res.access_token);
+
+        if (res.expires_in) {
+          const expirationTime = Date.now() + (res.expires_in * 1000);
+          localStorage.setItem('token_expiration', expirationTime.toString());
+        }
+
+        // ✅ Save role if backend sends it
+        if (res.role) {
+          localStorage.setItem("role", res.role);
+        }
       }
-      navigate('/dashboard');
+
+      // ✅ Decide redirect based on role
+      const role = res.role || localStorage.getItem("role");
+
+      if (role === "system_admin") {
+        navigate("/system_admin", { replace: true });
+      } else if (role === "org_admin") {
+        navigate("/org_admin", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true }); // default for normal users
+      }
+
     } catch (err) {
       console.error('Login error:', err);
+
       if (err.code === 'ERR_NETWORK') {
-        setError('Unable to connect to the server. Please ensure the backend is running on http://127.0.0.1:8000');
+        setError('Unable to connect to the server. Please check your internet connection and ensure the backend is running.');
+      } else if (err.response) {
+        const backendMessage = err.response.data?.detail || err.response.data?.message;
+        if (backendMessage) {
+          setError(backendMessage);
+        } else if (err.response.status === 401) {
+          setError('Unauthorized. Please check your email and password.');
+        } else if (err.response.status === 429) {
+          setError('Too many login attempts. Please try again later.');
+        } else if (err.response.status >= 500) {
+          setError('Server error. Please try again later.');
+        } else {
+          setError('Login failed. Please try again.');
+        }
       } else {
-        setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+        setError('Unexpected error occurred. Please try again.');
       }
+
+      logError(err);
     } finally {
       setLoading(false);
     }
+  };
+
+
+
+  // Optional: Error logging utility
+  const logError = (error) => {
+    const errorLog = {
+      timestamp: new Date().toISOString(),
+      error: error.message,
+      code: error.code,
+      status: error.response?.status,
+      url: error.config?.url,
+      data: error.response?.data
+    };
+    console.error('Login Error Details:', errorLog);
+
+    // You could also send this to an error tracking service
+    // trackError('login_error', errorLog);
   };
 
   return (
@@ -52,7 +108,7 @@ const Login = () => {
             <div className="w-16 h-16 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <LogIn className="text-white" size={32} />
             </div>
-            <h2 className="text-3xl font-bold text-white">Welcome Back</h2>
+            <h2 className="text-3xl font-bold text-white">Welcome</h2>
             <p className="text-white/70 mt-2">Sign in to your Productix AI account</p>
           </div>
 
@@ -108,9 +164,7 @@ const Login = () => {
           <div className="mt-6 text-center">
             <p className="text-white/70">
               Don't have an account?{' '}
-              <Link to="/signup" className="text-primary-400 hover:text-primary-300 font-medium">
-                Sign up here
-              </Link>
+              Contact: 03214917181
             </p>
           </div>
         </div>

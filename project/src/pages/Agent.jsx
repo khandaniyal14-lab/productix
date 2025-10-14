@@ -1,6 +1,53 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Target, BookOpen, AlertCircle, CheckCircle } from 'lucide-react';
+import { FileText, Target, BookOpen, AlertCircle, CheckCircle, Sparkles, Lightbulb, ChevronRight, TrendingUp } from 'lucide-react';
 import { agentService, productivityService } from '../services/api';
+import axios from 'axios';
+
+function formatMessage(text) {
+  if (!text) return "";
+
+  // If it's an object with a 'text' property, extract it
+  if (typeof text !== "string") {
+    if (text.text && typeof text.text === "string") {
+      text = text.text;
+    } else {
+      // Fallback: convert object/array to JSON string
+      text = JSON.stringify(text, null, 2);
+    }
+  }
+
+  let formatted = text;
+
+  // Headings
+  formatted = formatted.replace(/^###### (.*$)/gim, '<h6 class="text-base font-semibold text-white mt-4 mb-2">$1</h6>');
+  formatted = formatted.replace(/^##### (.*$)/gim, '<h5 class="text-lg font-semibold text-white mt-4 mb-2">$1</h5>');
+  formatted = formatted.replace(/^#### (.*$)/gim, '<h4 class="text-xl font-semibold text-white mt-4 mb-2">$1</h4>');
+  formatted = formatted.replace(/^### (.*$)/gim, '<h3 class="text-2xl font-bold text-white mt-5 mb-3">$1</h3>');
+  formatted = formatted.replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold text-white mt-5 mb-3">$1</h2>');
+  formatted = formatted.replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold text-white mt-6 mb-4">$1</h1>');
+
+  // Bold
+  formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-white">$1</strong>');
+
+  // Italic
+  formatted = formatted.replace(/(?<!\*)\*(?!\*)(.*?)\*(?<!\*)/g, '<em class="italic text-white/90">$1</em>');
+
+  // Horizontal rule
+  formatted = formatted.replace(/^\s*([-*_]){3,}\s*$/gm, '<hr class="my-4 border-white/10" />');
+
+  // Bullet points
+  formatted = formatted.replace(/^\s*[\*\-]\s+(.*)$/gm, '<li class="ml-4 text-white/80">$1</li>');
+  formatted = formatted.replace(/(<li.*<\/li>)/gs, '<ul class="list-disc space-y-2 my-3">$1</ul>');
+
+  // Numbered lists
+  formatted = formatted.replace(/^\s*\d+\.\s+(.*)$/gm, '<li class="ml-4 text-white/80">$1</li>');
+  formatted = formatted.replace(/(<li.*<\/li>)/gs, '<ol class="list-decimal space-y-2 my-3">$1</ol>');
+
+  // Line breaks
+  formatted = formatted.replace(/\n/g, '<br />');
+
+  return formatted;
+}
 
 const Agent = () => {
   const [goal, setGoal] = useState('');
@@ -17,6 +64,7 @@ const Agent = () => {
     try {
       const data = await productivityService.getRecords();
       setRecords(data);
+
     } catch (error) {
       console.error('Error fetching records:', error);
     }
@@ -24,27 +72,48 @@ const Agent = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!goal.trim()) return;
+    if (!goal.trim() || loading) return;
 
     setLoading(true);
     setError('');
+    setResults(null);
 
     try {
-      const response = await agentService.generateReport({
-        records: records,
-        goal: goal
-      });
-
+      const response = await agentService.generateReport({ records, goal });
       setResults(response);
     } catch (err) {
       console.error('Agent error:', err);
-      if (err.code === 'ERR_NETWORK') {
-        setError('Unable to connect to the server. Please ensure the backend is running on http://127.0.0.1:8000');
-      } else {
-        setError(err.response?.data?.message || 'Failed to generate report. Please try again.');
-      }
+      setError('Failed to generate report. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+  const handleDownload = async (reportId) => {
+    try {
+      const token = localStorage.getItem("access_token");
+      
+
+      const response = await fetch(`http://localhost:8000/agent/${reportId}/download`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.error("Server response:", text);
+        throw new Error(`Failed to download report: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `AI_Report_${reportId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error("❌ Error downloading report:", err);
+      alert("Failed to download report. Check console for details.");
     }
   };
 
@@ -53,169 +122,216 @@ const Agent = () => {
     'Identify and eliminate top 3 productivity bottlenecks',
     'Optimize workflow to reduce time waste by 20%',
     'Develop a personalized productivity improvement plan',
-    'Analyze current performance and set realistic targets'
   ];
 
   return (
-    <div className="min-h-screen p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2 flex items-center">
-            <FileText className="mr-3" size={36} />
+          <h1 className="text-4xl font-bold text-white mb-2 bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent flex items-center gap-3">
+            <Sparkles className="w-10 h-10 text-purple-400" />
             AI Agent Reports
           </h1>
-          <p className="text-white/70">
-            Generate comprehensive reports and action plans with AI agents based on your productivity data.
-          </p>
+          <p className="text-white/40 text-sm">Generate comprehensive reports and action plans based on your productivity data</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Goal Input */}
-          <div className="lg:col-span-1">
-            <div className="card p-6">
-              <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
-                <Target className="mr-2" size={20} />
-                Set Your Goal
-              </h3>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="form-label">Productivity Goal</label>
-                  <textarea
-                    value={goal}
-                    onChange={(e) => setGoal(e.target.value)}
-                    className="input-field h-32 resize-none"
-                    placeholder="Describe your productivity goal or what you want to achieve..."
-                    required
-                  />
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          {/* Left Sidebar - Goal Input & Suggestions */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Goal Input */}
+            <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-xl rounded-2xl border border-white/10 p-6">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="p-2 rounded-lg bg-purple-500/10">
+                  <Target className="w-5 h-5 text-purple-400" />
                 </div>
+                <h3 className="text-xl font-semibold text-white">Set Your Goal</h3>
+              </div>
+
+              <div className="space-y-4">
+                <textarea
+                  value={goal}
+                  onChange={(e) => setGoal(e.target.value)}
+                  className="w-full h-32 resize-none bg-white/10 border border-white/10 rounded-xl py-3 px-4 text-white placeholder-white/40 focus:outline-none focus:border-purple-500/50 focus:bg-white/15 transition-all duration-300"
+                  placeholder="e.g., 'Analyze my performance and create an improvement plan...'"
+                />
 
                 {error && (
-                  <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3 flex items-center">
-                    <AlertCircle className="text-red-400 mr-2" size={16} />
+                  <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 flex items-center gap-2">
+                    <AlertCircle className="text-red-400 flex-shrink-0" size={18} />
                     <span className="text-red-400 text-sm">{error}</span>
                   </div>
                 )}
 
                 <button
-                  type="submit"
+                  onClick={handleSubmit}
                   disabled={loading || !goal.trim()}
-                  className="w-full btn-primary py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl font-semibold text-white shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-3"
                 >
-                  {loading ? 'Generating Report...' : 'Generate AI Report'}
+                  {loading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Generating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-5 h-5" />
+                      <span>Generate AI Report</span>
+                    </>
+                  )}
                 </button>
-              </form>
-
-              <div className="mt-6">
-                <h4 className="text-white font-medium mb-3">Goal Suggestions</h4>
-                <div className="space-y-2">
-                  {goalSuggestions.map((suggestion, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setGoal(suggestion)}
-                      className="w-full text-left p-3 bg-white/5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white text-sm transition-colors"
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
-                </div>
               </div>
+            </div>
 
-              <div className="mt-6 p-3 bg-blue-500/20 border border-blue-500/30 rounded-lg">
-                <p className="text-blue-400 text-sm">
-                  <strong>Data Available:</strong> {records.length} records
-                </p>
-                <p className="text-white/60 text-xs mt-1">
-                  The AI agent will analyze your productivity data to create personalized recommendations.
-                </p>
+            {/* Goal Suggestions */}
+            <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-xl rounded-2xl border border-white/10 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 rounded-lg bg-blue-500/10">
+                  <Lightbulb className="w-5 h-5 text-blue-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white">Goal Suggestions</h3>
+              </div>
+              <div className="space-y-2">
+                {goalSuggestions.map((suggestion, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setGoal(suggestion)}
+                    className="w-full text-left p-3 flex items-center justify-between bg-white/5 hover:bg-white/10 border border-transparent hover:border-blue-500/20 rounded-lg text-white/70 hover:text-white text-sm transition-all duration-300 group"
+                  >
+                    <span className="flex-1">{suggestion}</span>
+                    <ChevronRight className="w-4 h-4 text-white/30 group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Data Source Info */}
+            <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-xl rounded-2xl border border-white/10 p-6">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 rounded-lg bg-emerald-500/10">
+                  <TrendingUp className="w-5 h-5 text-emerald-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white">Data Source</h3>
+              </div>
+              <p className="text-white/60 text-sm mb-2">
+                Analysis based on Products records collected so far.
+              </p>
+              <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 w-full" />
               </div>
             </div>
           </div>
 
-          {/* Results */}
-          <div className="lg:col-span-2">
-            <div className="card p-6">
-              <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
-                <BookOpen className="mr-2" size={20} />
-                AI Agent Report
-              </h3>
-
-              {results ? (
-                <div className="space-y-6">
-                  <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-4 flex items-center mb-6">
-                    <CheckCircle className="text-green-400 mr-2" size={20} />
-                    <span className="text-green-400">Report generated successfully!</span>
-                  </div>
-
-                  {/* Action Plan */}
-                  {results.plan && (
-                    <div className="bg-white/5 rounded-lg p-6">
-                      <h4 className="text-xl font-semibold text-white mb-4 flex items-center">
-                        <Target className="mr-2 text-primary-400" size={20} />
-                        Action Plan
-                      </h4>
-                      <div className="prose prose-invert max-w-none">
-                        <div className="text-white/80 whitespace-pre-wrap leading-relaxed">
-                          {results.plan}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Detailed Report */}
-                  {results.report && (
-                    <div className="bg-white/5 rounded-lg p-6">
-                      <h4 className="text-xl font-semibold text-white mb-4 flex items-center">
-                        <FileText className="mr-2 text-secondary-400" size={20} />
-                        Detailed Analysis Report
-                      </h4>
-                      <div className="prose prose-invert max-w-none">
-                        <div className="text-white/80 whitespace-pre-wrap leading-relaxed">
-                          {results.report}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Additional Insights */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-lg p-4">
-                      <h5 className="text-white font-semibold mb-2">Key Metrics</h5>
-                      <p className="text-white/70 text-sm">
-                        Based on {records.length} productivity calculations
-                      </p>
-                    </div>
-
-                    <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-lg p-4">
-                      <h5 className="text-white font-semibold mb-2">AI Confidence</h5>
-                      <p className="text-white/70 text-sm">
-                        High confidence based on available data
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center text-white/60 py-12">
-                  <FileText size={64} className="mx-auto mb-4 opacity-50" />
-                  <h4 className="text-lg font-medium text-white mb-2">No Report Generated Yet</h4>
-                  <p className="text-sm">
-                    Set a productivity goal and click "Generate AI Report" to get personalized insights and action plans.
-                  </p>
-                  
-                  {records.length === 0 && (
-                    <div className="mt-4 p-4 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
-                      <p className="text-yellow-400 text-sm">
-                        <strong>Note:</strong> You don't have any productivity calculations yet. 
-                        Consider creating some calculations first for more accurate reports.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
+          {/* Right Content - Results */}
+          <div className="lg:col-span-3 bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-xl rounded-2xl border border-white/10 p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 rounded-lg bg-purple-500/10">
+                <BookOpen className="w-6 h-6 text-purple-400" />
+              </div>
+              <h3 className="text-2xl font-semibold text-white">AI Agent Report</h3>
             </div>
+
+            {results ? (
+              <div className="space-y-6">
+
+                {/* ✅ Download Button */}
+                <div className="flex justify-end mb-4">
+                  <button
+                    onClick={() => handleDownload(results.id)}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl text-white font-semibold text-sm shadow-lg hover:shadow-emerald-500/30 hover:scale-[1.03] transition-all duration-300"
+                  >
+                    <FileText size={16} />
+                    Download Report
+                  </button>
+
+                </div>
+                {/* Success Banner */}
+                <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 flex items-center gap-3">
+                  <CheckCircle className="text-green-400 flex-shrink-0" size={20} />
+                  <span className="text-green-400 font-medium text-sm">
+                    Report generated successfully
+                  </span>
+                </div>
+
+                {/* Action Plan */}
+                <div className="bg-white/5 border border-white/10 rounded-xl p-6 hover:border-purple-500/30 transition-all duration-300">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="p-1.5 rounded-lg bg-purple-500/10">
+                      <Target size={18} className="text-purple-400" />
+                    </div>
+                    <h4 className="font-semibold text-white text-lg">Action Plan</h4>
+                  </div>
+                  <div
+                    className="text-white/80 text-sm leading-relaxed prose prose-invert max-w-none"
+                    dangerouslySetInnerHTML={{ __html: formatMessage(results.plan) }}
+                  />
+                </div>
+
+                {/* Detailed Analysis */}
+                <div className="bg-white/5 border border-white/10 rounded-xl p-6 hover:border-blue-500/30 transition-all duration-300">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="p-1.5 rounded-lg bg-blue-500/10">
+                      <FileText size={18} className="text-blue-400" />
+                    </div>
+                    <h4 className="font-semibold text-white text-lg">Detailed Analysis</h4>
+                  </div>
+                  <div
+                    className="text-white/80 text-sm leading-relaxed prose prose-invert max-w-none"
+                    dangerouslySetInnerHTML={{ __html: formatMessage(results.report) }}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-24 text-center">
+                {loading ? (
+                  <>
+                    <div className="relative mb-6">
+                      <BookOpen className="w-20 h-20 text-white/20" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-24 h-24 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
+                      </div>
+                    </div>
+                    <p className="text-white/60 font-medium mb-2">Analyzing your productivity data...</p>
+                    <p className="text-white/40 text-sm max-w-md">
+                      The AI agent is processing {records.length} records to generate your personalized report
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <BookOpen className="w-20 h-20 text-white/20 mb-6" />
+                    <h4 className="text-white font-semibold text-lg mb-2">Ready to Generate Your Report</h4>
+                    <p className="text-white/40 text-sm max-w-md">
+                      Set your goal above and click "Generate AI Report" to receive a comprehensive analysis and action plan
+                    </p>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      <style>{`
+        .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+          margin-top: 1.5em;
+          margin-bottom: 0.75em;
+        }
+        .prose ul, .prose ol {
+          margin-top: 0.75em;
+          margin-bottom: 0.75em;
+        }
+        .prose li {
+          margin-top: 0.25em;
+          margin-bottom: 0.25em;
+        }
+        .prose strong {
+          font-weight: 600;
+        }
+        .prose hr {
+          margin-top: 1.5em;
+          margin-bottom: 1.5em;
+        }
+      `}</style>
     </div>
   );
 };

@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { jwtDecode } from "jwt-decode";
+
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
 
@@ -40,16 +42,28 @@ export const authService = {
     return response.data;
   },
 
+
+
   login: async (credentials) => {
-    const response = await api.post('/login', credentials);
-    if (response.data.token) {
-      localStorage.setItem('token', response.data.token);
+    const response = await api.post("/login/login", credentials);
+    if (response.data.access_token) {
+      const token = response.data.access_token;
+      localStorage.setItem("token", token);
+
+      // decode token to get role
+      const decoded = jwtDecode(token);
+      localStorage.setItem("role", decoded.role);
     }
     return response.data;
   },
 
+
   logout: () => {
     localStorage.removeItem('token');
+  },
+
+  getRole: () => {
+    return localStorage.getItem('role');
   },
 
   isAuthenticated: () => {
@@ -60,7 +74,8 @@ export const authService = {
 // Productivity calculation services
 export const productivityService = {
   calculate: async (data) => {
-    const response = await api.post('/calculate', data);
+    
+    const response = await api.post('/productivity/calculate', data);
     console.log(response.data);
     return response.data;
 
@@ -78,7 +93,7 @@ export const productivityService = {
 
   getRecords: async () => {
     try {
-      const response = await api.get('/productivity-records');
+      const response = await api.get('/analytics/productivity-records');
       return response.data;
     } catch (error) {
       // Return empty array if endpoint doesn't exist yet
@@ -91,7 +106,7 @@ export const productivityService = {
 // AI Analysis services
 export const analysisService = {
   analyze: async (data) => {
-    const response = await api.post('/analyze', data);
+    const response = await api.post('/ai/analyze', data);
     return response.data;
   }
 };
@@ -99,7 +114,7 @@ export const analysisService = {
 // Chatbot services
 export const chatbotService = {
   sendMessage: async (data) => {
-    const response = await api.post('/chatbot', data);
+    const response = await api.post('/chatbot/rag', data);
     return response.data;
   }
 };
@@ -109,7 +124,18 @@ export const agentService = {
   generateReport: async (data) => {
     const response = await api.post('/agent', data);
     return response.data;
-  }
+  },
+  downloadReport: (reportId) => {
+    return `${import.meta.env.VITE_API_URL}/agent/${reportId}/download`;
+  },
 };
+
+export const ragChatbotService = {
+  sendMessage: async (data) => {
+    const response = await api.post("/rag_chat", data);
+    return response.data; // ✅ returns plain string
+  },
+};
+
 
 export default api;
