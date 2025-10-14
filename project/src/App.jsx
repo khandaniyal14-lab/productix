@@ -4,7 +4,7 @@ import { authService } from './services/api';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute';
-import Layout from './components/Layout'; // New Layout with Sidebar
+import Layout from './components/layout'; // New Layout with Sidebar
 
 // Pages
 import Landing from './pages/Landing';
