@@ -5,15 +5,15 @@ from .router import uploads
 from .router import Dashboard, Productivity_calculator, agent, ai_analysis, analytics, chatbot, login
 from .router import auth, User
 from .database import Base, engine
-from app.router import organization
-from app.router import Product
-from app.router import Batch    
+from .router import organization
+from .router import Product
+from .router import Batch    
 from fastapi.middleware.cors import CORSMiddleware
-from app.router import shift_entries
+from .router import shift_entries
 from fastapi import FastAPI, Depends
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.openapi.utils import get_openapi
-from app.router import system_admin_router
+from .router import system_admin_router
 
 
 
