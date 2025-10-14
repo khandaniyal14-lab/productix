@@ -23,7 +23,7 @@ from sqlalchemy.orm import Session
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment
 
-from app import models
+from .. import models
  # adjust import if different
 
 router = APIRouter(prefix="/api/v1/uploads", tags=["uploads"])
