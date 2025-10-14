@@ -1,5 +1,5 @@
-from app.models import User, UserRole
-from app.database import SessionLocal
+from .models import User, UserRole
+from .database import SessionLocal
 from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
