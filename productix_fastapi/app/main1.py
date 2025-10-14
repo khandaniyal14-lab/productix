@@ -24,7 +24,7 @@ app = FastAPI(title="Multi-tenant Productivity CRM")
 
 origins = [
     "http://localhost:5173",
-    "http://127.0.0.1:5173",
+    https://productix.techohub.net/,
     # add production URL here later, e.g. "https://yourdomain.com"
 ]
 
