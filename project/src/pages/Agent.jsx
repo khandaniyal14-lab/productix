@@ -93,7 +93,7 @@ const Agent = () => {
       const token = localStorage.getItem("access_token");
       
 
-      const response = await fetch(`http://localhost:8000/agent/${reportId}/download`, {
+      const response = await fetch(`https://productix-backend-v1rk.onrender.com/agent/${reportId}/download`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
