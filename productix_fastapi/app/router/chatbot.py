@@ -123,7 +123,7 @@ def answer_product(db, org_id: int, identifier: Optional[str]) -> Optional[str]:
     """
     Return string answer for products. identifier may be partial name.
     """
-    from app.models import Product, Batch
+
 
     if identifier:
         products = db.query(Product).filter(
