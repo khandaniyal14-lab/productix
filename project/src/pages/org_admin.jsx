@@ -220,13 +220,13 @@ const OrgAdminDashboard = () => {
             <div className="flex gap-2 mb-2">
               <button
                 onClick={addInput}
-                className="p-2 bg-purple-500/10 rounded-lg"
+                className="p-2 bg-purple-500/50 rounded-lg"
               >
                 Add Input
               </button>
               <button
                 onClick={addOutput}
-                className="p-2 bg-emerald-500/10 rounded-lg"
+                className="p-2 bg-emerald-500/50 rounded-lg"
               >
                 Add Output
               </button>
