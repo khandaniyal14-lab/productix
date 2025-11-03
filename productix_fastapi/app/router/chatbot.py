@@ -72,7 +72,7 @@ def answer_batch(db, org_id: int, identifier: Optional[str]) -> Optional[str]:
     """
     Return a string answer for a batch. identifier may be batch_number or id fragment.
     """
-    from app.models import Batch, ShiftEntry
+ 
 
     if identifier:
         # Try exact match on batch_number
