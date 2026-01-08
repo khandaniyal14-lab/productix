@@ -18,7 +18,7 @@ load_dotenv()  # ✅ loads .env file
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 APP_CONFIG = {
-    "api_key": "AIzaSyDNTHhoC5LgtE4oA9Q4jd6klY0-V4PAC4c",
+    "api_key": "AIzaSyBRRtjyJjmK3OxKJW7RSmF4VAkbX--0KOA",
 }
 
 
@@ -126,7 +126,7 @@ def get_ai_analysis(calculation_data: dict) -> dict:
         A dictionary with the parsed AI analysis or an error message.
     """
     api_key = APP_CONFIG.get("api_key")
-    if not api_key or api_key == "AIzaSyDNTHhoC5LgtE4oA9Q4jd6klY0-V4PAC4c":
+    if not api_key or api_key == "AIzaSyBRRtjyJjmK3OxKJW7RSmF4VAkbX--0KOA":
         return {"error": "API Key is not configured."}
 
     # Format the data into a string for the prompt
